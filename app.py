@@ -132,7 +132,7 @@ with tab1:
                          attribution_control=False)
         m2.add_basemap('CartoDB.PositronNoLabels')
         
-        m2.add_gdf(geo_target)l
+        m2.add_gdf(geo_target)
         m2.to_streamlit()
 
 with tab2:
