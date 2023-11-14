@@ -119,7 +119,7 @@ with tab1:
                        f'{geo_target["MunLabel"].iloc[0]}</div>')).add_to(m)
         
         geo_j.add_to(m)
-        mun_map = st_folium(m, height = 400, use_container_width = True)
+        # mun_map = st_folium(m, height = 400, use_container_width = True)
 
         import leafmap.foliumap as leafmap
 
@@ -135,7 +135,7 @@ with tab1:
         style = {
                 # "stroke": True,
                 "color": "#CC0033",
-                "weight": 2,
+                "weight": 3,
                 "opacity": 1,
                 "fill": True,
                 "fillColor": "#CC0033",
@@ -147,7 +147,7 @@ with tab1:
         m2.add_labels(
             geo_target,
             'MunLabel',
-            font_size="14pt",
+            font_size="11pt",
             font_color="black",
             font_family="arial",
             font_weight="bold"
