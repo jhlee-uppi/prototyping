@@ -128,9 +128,10 @@ with tab1:
 
         filename = 'wind_global.nc'
         geojson = 'https://github.com/opengeos/leafmap/raw/master/examples/data/countries.geojson'
-        m2 = leafmap.Map(layers_control=True)
-        m2.add_basemap('CartoDB.DarkMatter')
+        m2 = leafmap.Map(layers_control=False)
+        m2.add_basemap('CartoDB.positron')
         m2.add_velocity(filename, zonal_speed='u_wind', meridional_speed='v_wind')
+        m2.add_geojson(geo_j)
         m2.to_streamlit()
 
 with tab2:
