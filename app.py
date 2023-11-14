@@ -101,7 +101,7 @@ with tab1:
         geo_target['lon'] = geo_target.representative_point().x
         geo_target['lat'] = geo_target.representative_point().y
         
-        m = folium.Map(location=[float(geo_target.lat), float(geo_target.lon)],
+        m = folium.Map(location=[ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
                        min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False,
                        tiles="CartoDB positron")
         sim_geo = gpd.GeoSeries(geo_target["geometry"]).simplify(tolerance=0.0001).to_crs(4326)
@@ -110,7 +110,7 @@ with tab1:
                                style_function=lambda x: {"fillOpacity": .5, 'fillColor':'#CC0033', 
                                                          'color':'#CC0033'})
         folium.map.Marker(
-              [float(geo_target['lat']),float(geo_target['lon'])],
+              [ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
               icon=DivIcon(
                   icon_size=(400,50),
                   icon_anchor=(200,25),
