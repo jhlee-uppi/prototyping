@@ -139,8 +139,8 @@ with tab1:
             font_color="black",
             font_family="arial",
             font_weight="bold",
-            text-align = "center",
-            vertical-align= "middle"
+            text_align = "center",
+            vertical_align= "middle"
         )
         
         m2.to_streamlit(height=400, )
