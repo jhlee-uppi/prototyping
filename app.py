@@ -131,7 +131,7 @@ with tab1:
                          fullscreen_control=False,
                          attribution_control=False)
         m2.add_basemap('CartoDB.PositronNoLabels')
-        m2.add_gdf(geo_target)
+        
         style = {
                 # "stroke": True,
                 "color": "#CC0033",
@@ -143,6 +143,7 @@ with tab1:
                 # "dashArray": "9"
                 # "clickable": True,
             }
+        m2.add_gdf(geo_target, style = style)
         m2.add_labels(
             geo_target,
             'MunLabel',
