@@ -318,9 +318,9 @@ with tab3:
 
 with tab9:
     st.markdown('''
-    - This simulator involves New Jersey municipalities with their own K–12 school districts: `212`/`565` (`37.5%` coverage).
+    - This simulator includes New Jersey municipalities with their own K–12 school districts: `212`/`565` (`37.5%` coverage).
         - E.g., `Hoboken City` - `Hoboken Public School District`
-    - `11/07/2023` version
+    - `11/14/2023` version
     ''')
 
 # st.divider()
