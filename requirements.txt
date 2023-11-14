@@ -1,4 +1,7 @@
-streamlit
-numpy
+folium
+streamlit-folium
+streamlit-extras
 pandas
+numpy
+geopandas
 plotly
