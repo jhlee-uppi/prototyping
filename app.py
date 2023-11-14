@@ -83,7 +83,7 @@ with tab1:
     @st.cache_data
     def load_geojson():
         # map
-        geo_NJ = gpd.read_file('data/Municipal_Boundaries_of_NJ.geojson')
+        geo_NJ = gpd.read_file('data/Municipal_Boundaries_of_NJ.geojson.zip')
         geo_NJ['County'] = geo_NJ['COUNTY'].str.title()
         geo_NJ['Municipality'] = geo_NJ['MUN_LABEL']
     
