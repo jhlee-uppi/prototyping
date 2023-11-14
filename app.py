@@ -121,6 +121,18 @@ with tab1:
         geo_j.add_to(m)
         mun_map = st_folium(m, height = 400, use_container_width = True)
 
+        import leafmap.foliumap as leafmap
+
+
+        st.header('Test')
+
+        filename = 'wind_global.nc'
+        geojson = 'https://github.com/opengeos/leafmap/raw/master/examples/data/countries.geojson'
+        m2 = leafmap.Map(layers_control=True)
+        m2.add_basemap('CartoDB.DarkMatter')
+        m2.add_velocity(filename, zonal_speed='u_wind', meridional_speed='v_wind')
+        m2.to_streamlit()
+
 with tab2:
     with stylable_container(
         key="mun_nav",
