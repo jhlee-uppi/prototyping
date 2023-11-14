@@ -131,8 +131,8 @@ with tab1:
         m2 = leafmap.Map(layers_control=False)
         m2.add_basemap('CartoDB.positron')
         m2.add_velocity(filename, zonal_speed='u_wind', meridional_speed='v_wind')
-        geo_j = sim_geo.to_json()
-        m2.add_geojson(geo_j)
+        
+        m2.add_gdf(geo_target)
         m2.to_streamlit()
 
 with tab2:
