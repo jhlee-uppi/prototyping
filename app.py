@@ -131,8 +131,16 @@ with tab1:
                          fullscreen_control=False,
                          attribution_control=False)
         m2.add_basemap('CartoDB.PositronNoLabels')
-        
         m2.add_gdf(geo_target)
+        m2.add_label(
+            geo_target,
+            'MunLabel',
+            font_size="14pt",
+            font_color="black",
+            font_family="arial",
+            font_weight="bold",
+        )
+        
         m2.to_streamlit()
 
 with tab2:
