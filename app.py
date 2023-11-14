@@ -139,9 +139,11 @@ with tab1:
             font_color="black",
             font_family="arial",
             font_weight="bold",
+            text-align = "center",
+            vertical-align= "middle"
         )
         
-        m2.to_streamlit()
+        m2.to_streamlit(height=400, )
 
 with tab2:
     with stylable_container(
