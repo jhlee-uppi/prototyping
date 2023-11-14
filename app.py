@@ -132,7 +132,7 @@ with tab1:
                          attribution_control=False)
         m2.add_basemap('CartoDB.PositronNoLabels')
         m2.add_gdf(geo_target)
-        m2.add_label(
+        m2.add_labels(
             geo_target,
             'MunLabel',
             font_size="14pt",
