@@ -132,9 +132,9 @@ with tab1:
                          attribution_control=False)
         m2.add_basemap('CartoDB.PositronNoLabels')
         m2.add_gdf(geo_target)
-        html=f'<div style="font-size:14px; color:black;' +
-                       f'font-weight:bold;text-align:center;vertical-align: middle;">' +
-                       f'{geo_target["MunLabel"].iloc[0]}</div>'
+        html=f'<div style="font-size:14px; color:black;'
+        html=html+f'font-weight:bold;text-align:center;vertical-align: middle;">'
+        html=html+f'{geo_target["MunLabel"].iloc[0]}</div>'
         m2.add_labels(
             geo_target,
             'MunLabel',
