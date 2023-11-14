@@ -103,8 +103,8 @@ with tab1:
         geo_target['lat'] = geo_target.representative_point().y
         
         m = folium.Map(location=[geo_target.lat, geo_target.lon],
-                       min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False,
-                       tiles="CartoDB positron")
+                       min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False)#,
+                      # tiles="CartoDB positron")
         #sim_geo = gpd.GeoSeries(geo_target["geometry"]).simplify(tolerance=0.0001).to_crs(4326)
         #geo_j = sim_geo.to_json()
         #geo_j = folium.GeoJson(data=geo_j, 
