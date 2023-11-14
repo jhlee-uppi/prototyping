@@ -36,7 +36,7 @@ with col_0_2:
 # st.sidebar.markdown("# Fiscal Impact Simulator")
 # st.divider()
     
-# @st.cache_data
+@st.cache_data
 def load_data():
     
     # datasets
@@ -92,6 +92,8 @@ with tab1:
     
         return geo_NJ
     geo_NJ = load_geojson()
+
+    st.text(len(geo_NJ))
     
     with col_mun_1:
         tb_target = df_Mun_NJ_FIA_MunList[
