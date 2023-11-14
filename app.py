@@ -100,6 +100,7 @@ with tab1:
         geo_target = geo_NJ.merge(tb_target)
         geo_target['lon'] = geo_target.representative_point().x
         geo_target['lat'] = geo_target.representative_point().y
+        geo_target['MunLabel'] = geo_target['MunLabel'].str.replace('City City','City')
         
         m = folium.Map(location=[ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
                        min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False,
