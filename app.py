@@ -92,8 +92,6 @@ with tab1:
     
         return geo_NJ
     geo_NJ = load_geojson()
-
-    st.text(len(geo_NJ))
     
     with col_mun_1:
         tb_target = df_Mun_NJ_FIA_MunList[
@@ -107,21 +105,21 @@ with tab1:
         m = folium.Map(location=[geo_target.lat, geo_target.lon],
                        min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False,
                        tiles="CartoDB positron")
-        sim_geo = gpd.GeoSeries(geo_target["geometry"]).simplify(tolerance=0.0001).to_crs(4326)
-        geo_j = sim_geo.to_json()
-        geo_j = folium.GeoJson(data=geo_j, 
-                               style_function=lambda x: {"fillOpacity": .5, 'fillColor':'#CC0033', 
-                                                         'color':'#CC0033'})
-        folium.map.Marker(
-              [geo_target['lat'],geo_target['lon']],
-              icon=DivIcon(
-                  icon_size=(400,50),
-                  icon_anchor=(200,25),
-                  html=f'<div style="font-size:14px; color:black;' +
-                       f'font-weight:bold;text-align:center;vertical-align: middle;">' +
-                       f'{geo_target["MunLabel"].iloc[0]}</div>')).add_to(m)
+        #sim_geo = gpd.GeoSeries(geo_target["geometry"]).simplify(tolerance=0.0001).to_crs(4326)
+        #geo_j = sim_geo.to_json()
+        #geo_j = folium.GeoJson(data=geo_j, 
+        #                       style_function=lambda x: {"fillOpacity": .5, 'fillColor':'#CC0033', 
+        #                                                 'color':'#CC0033'})
+        #folium.map.Marker(
+        #      [geo_target['lat'],geo_target['lon']],
+        #      icon=DivIcon(
+        #          icon_size=(400,50),
+        #          icon_anchor=(200,25),
+        #          html=f'<div style="font-size:14px; color:black;' +
+        #               f'font-weight:bold;text-align:center;vertical-align: middle;">' +
+        #               f'{geo_target["MunLabel"].iloc[0]}</div>')).add_to(m)
         
-        geo_j.add_to(m)
+        #geo_j.add_to(m)
         mun_map = st_folium(m, height = 400, use_container_width = True)
 
 with tab2:
