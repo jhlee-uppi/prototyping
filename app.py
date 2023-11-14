@@ -142,7 +142,7 @@ with tab1:
             font_color="black",
             font_family="arial",
             font_weight="bold",
-            (html = html)
+            html = html
         )
         
         m2.to_streamlit(height=400, )
