@@ -15,6 +15,7 @@ from PIL import Image
 from folium.features import DivIcon
 from streamlit_folium import st_folium
 import folium
+import leafmap.foliumap as leafmap
 
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
@@ -35,18 +36,24 @@ with col_0_2:
 # st.sidebar.markdown("# Fiscal Impact Simulator")
 # st.divider()
     
-# @st.cache_data
+@st.cache_data
 def load_data():
     
     # datasets
     df_DM_NJ_t01 = pd.read_csv('data/DM_NJ_2021ACS_tableIIB1.csv')
     df_DM_NJ_t02 = pd.read_csv('data/DM_NJ_2021ACS_tableIIB2.csv')
     df_Mun_NJ_FIA = pd.read_csv('data/FIA_NJ_110723.csv')
+    df_Mun_NJ_Buyout = pd.read_csv('data/111823_buyout_values.csv')
 
     # municipalities with K-12 school districts
     df_Mun_NJ_FIA = df_Mun_NJ_FIA.loc[~df_Mun_NJ_FIA.LEAID.isna()]
     df_Mun_NJ_FIA = df_Mun_NJ_FIA.loc[~df_Mun_NJ_FIA.LEAID.isna()]
 
+    # buyout avg price
+    df_Mun_NJ_Buyout = df_Mun_NJ_Buyout.loc[(df_Mun_NJ_Buyout.flag != 'E') & ~df_Mun_NJ_Buyout.Municipality.isna()]
+    df_Mun_NJ_Buyout['AVERAGE_VALUE_BUYOUT_PROPERTY'].str.replace('[^0-9]+','').astype(str)
+    df_Mun_NJ_Buyout['buyout_avg_value'] = df_Mun_NJ_Buyout['AVERAGE_VALUE_BUYOUT_PROPERTY'].str.replace('[^0-9]+','',regex = True)
+    
     # calculations
     df_Mun_NJ_FIA_ = df_Mun_NJ_FIA[['County', 'Municipality',
                                     'levy_mun_rShare_perCap','levy_school_perPupil',
@@ -58,10 +65,16 @@ def load_data():
     # parameters for selector
     df_Mun_NJ_FIA_MunList = df_Mun_NJ_FIA_[['County','Municipality']]
     df_Mun_NJ_FIA_MunList['MunLabel'] = df_Mun_NJ_FIA_MunList.apply(lambda x: '{} ({})'.format(x.Municipality,x.County),axis=1)
+    df_Mun_NJ_Buyout_city = df_Mun_NJ_Buyout.loc[df_Mun_NJ_Buyout.Municipality.str.contains('City')]
+    df_Mun_NJ_Buyout_city['Municipality'] = df_Mun_NJ_Buyout_city.Municipality.str.replace('City','City City', regex = False)
+    df_Mun_NJ_Buyout_mod = pd.concat([df_Mun_NJ_Buyout,df_Mun_NJ_Buyout_city], axis = 0).reset_index(drop = True)
 
-    return df_DM_NJ_t01, df_DM_NJ_t02, df_Mun_NJ_FIA, df_Mun_NJ_FIA_, df_Mun_NJ_FIA_MunList
+    return df_DM_NJ_t01, df_DM_NJ_t02, df_Mun_NJ_FIA, df_Mun_NJ_FIA_, df_Mun_NJ_FIA_MunList, df_Mun_NJ_Buyout_mod
     
-df_DM_NJ_t01, df_DM_NJ_t02, df_Mun_NJ_FIA, df_Mun_NJ_FIA_, df_Mun_NJ_FIA_MunList = load_data()
+df_DM_NJ_t01, df_DM_NJ_t02, df_Mun_NJ_FIA, df_Mun_NJ_FIA_, df_Mun_NJ_FIA_MunList, df_Mun_NJ_Buyout_mod = load_data()
+
+df_DM_NJ_t01.HousingType = df_DM_NJ_t01.HousingType.str.replace(' +\\(.*\\),*',',',regex = True)
+df_DM_NJ_t02.HousingType = df_DM_NJ_t02.HousingType.str.replace(' +\\(.*\\),*',',',regex = True)
 
 tab1, tab2, tab3, tab9 = st.tabs(["Municipality", "Simulator", "Dashboard","About"])
 
@@ -102,27 +115,11 @@ with tab1:
         geo_target['lat'] = geo_target.representative_point().y
         geo_target['MunLabel'] = geo_target['MunLabel'].str.replace('City City','City')
         
-        m = folium.Map(location=[ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
-                       min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False,
-                       tiles="CartoDB positron")
         sim_geo = gpd.GeoSeries(geo_target["geometry"]).simplify(tolerance=0.0001).to_crs(4326)
         geo_j = sim_geo.to_json()
         geo_j = folium.GeoJson(data=geo_j, 
                                style_function=lambda x: {"fillOpacity": .5, 'fillColor':'#CC0033', 
                                                          'color':'#CC0033'})
-        folium.map.Marker(
-              [ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
-              icon=DivIcon(
-                  icon_size=(400,50),
-                  icon_anchor=(200,25),
-                  html=f'<div style="font-size:14px; color:black;' +
-                       f'font-weight:bold;text-align:center;vertical-align: middle;">' +
-                       f'{geo_target["MunLabel"].iloc[0]}</div>')).add_to(m)
-        
-        geo_j.add_to(m)
-        # mun_map = st_folium(m, height = 400, use_container_width = True)
-
-        import leafmap.foliumap as leafmap
 
         m2 = leafmap.Map(
             search_control = False,
@@ -156,6 +153,12 @@ with tab1:
         
         m2.to_streamlit(height=400, )
 
+def _select_list():
+    try:
+        return select_list_housingType
+    except:
+        return df_DM_NJ_t01.HousingType.drop_duplicates().tolist()
+        
 with tab2:
     with stylable_container(
         key="mun_nav",
@@ -168,10 +171,13 @@ with tab2:
             """,
     ):
         annotated_text(
-            "**Selected Municipality**", " ", (select_State, "state", "#d6d7da"), " ", (select_County, "county", "#d6d7da")," ",(select_Mun, "municipality", "#d6d7da")
+            "**Selected Municipality**", " ", 
+            (select_State, "state", "#d6d7da"), " ", 
+            (select_County, "county", "#d6d7da")," ",
+            (select_Mun, "municipality", "#d6d7da")
         )      
     
-    param_HousingType = 'Single-Family Detached  (Own/Rent), 4-5 BR'
+    param_HousingType = 'Single-Family Detached, 4-5 BR'
     param_ValueType = 'All Values'
     
     # breakeven analysis
@@ -184,17 +190,17 @@ with tab2:
     df_Mun_NJ_FIA_['SchCost_unit'] = df_Mun_NJ_FIA_['SchLevy_PP'] * df_DM_NJ_t02_
     df_Mun_NJ_FIA_['TotCost_unit'] = df_Mun_NJ_FIA_['MunCost_unit']+df_Mun_NJ_FIA_['SchCost_unit']
     df_Mun_NJ_FIA_['Breakeven_Mvalue'] = df_Mun_NJ_FIA_['TotCost_unit'] / (df_Mun_NJ_FIA_['SumRate_Mun_Sch']/100)
+    # df_Mun_NJ_FIA_ = df_Mun_NJ_FIA_.merge(df_Mun_NJ_Buyout, how = 'left')
     
     # Breakeven Analysis Table
     de_breakeven_in = pd.DataFrame(
         {
-            "HousingType": [df_DM_NJ_t01.HousingType.drop_duplicates().tolist()[0]],
-            "num_units": [1],
-            "buyoutMValue":[0]
+            "HousingType": df_DM_NJ_t01.HousingType.drop_duplicates().iloc[[1,2,3,4]].tolist(),
+            "num_units": [1,1,1,1],
+            "buyoutMValue":[0,0,0,0]
         }
     )
-    
-    
+
     de_breakeven_out = pd.DataFrame(
         {
             "BE_MValue": []
@@ -202,19 +208,21 @@ with tab2:
     )
 
     col_BE_1, col_BE_2 = st.columns([0.8, 0.2])
-    
+
     with col_BE_1:
+        
         st.markdown("### Input")
         de_breakeven_cal = st.data_editor(
             de_breakeven_in, #.style.format({"buyoutMValue": "$ {:,.0f}"}), # this part is problematic; makes the simulator uneditable
             use_container_width = True,
             column_config={
-                "HousingType": st.column_config.SelectboxColumn(
+                "HousingType": st.column_config.TextColumn(
                     "Housing Type",
                     help="The category of housing units",
                     width='medium',
-                    options=df_DM_NJ_t01.HousingType.drop_duplicates().tolist(),
-                    required=True,
+                    disabled = True
+                    # options=_select_list(),
+                    # required=True,
                 ),
                 "num_units": st.column_config.NumberColumn(
                     "# units",
@@ -234,9 +242,16 @@ with tab2:
                 )
             },
             hide_index=True,
-            num_rows = 'dynamic'
+            num_rows = 'fixed' # dynamic
         )
-    
+
+        select_list_housingType = df_DM_NJ_t01[~df_DM_NJ_t01.HousingType.isin(de_breakeven_cal.HousingType)]
+        select_list_housingType = select_list_housingType.HousingType.drop_duplicates().tolist()
+
+        # select_list_housingType = select_list_housingType[select_list_housingType.isin(de_breakeven_cal.HousingType)]
+        # df_DM_NJ_t01[~df_DM_NJ_t01.HousingType.isin(select_list_housingType)].HousingType.drop_duplicates().tolist()
+        # st.dataframe(_select_list())
+
     with col_BE_2:
         st.markdown("### Output")
         de_breakeven_out_ = pd.DataFrame(de_breakeven_cal)
@@ -258,9 +273,7 @@ with tab2:
         de_breakeven_out_['BreakevenMValue'] = de_breakeven_out_['TotCost_unit'] / (select_mun_be['SumRate_Mun_Sch'].iloc[0]/100)
         de_breakeven_out_['FiscalBalance_unit'] = - (de_breakeven_out_['BreakevenMValue'] - de_breakeven_out_['buyoutMValue'])
         de_breakeven_out_['FiscalBalance_total'] = de_breakeven_out_['FiscalBalance_unit'] * de_breakeven_out_['num_units']
-    
-        # de_breakeven_out_
-        
+
         st.data_editor(
             de_breakeven_out_[['FiscalBalance_total']
             ].style.format({"FiscalBalance_total": "$ {:,.0f}"}),
@@ -294,21 +307,57 @@ with tab3:
 
     col_Dash_1, col_Dash_2 = st.columns(2)
 
+    def _summary_text_return(list_HousingType, data):
+        _summary_text = []
+        for i in list_HousingType:
+            _summary_data = data.loc[data.HousingType == i]
+            _summary_data_type = _summary_data.HousingType.iloc[0]
+            _summary_data_bv = _summary_data.loc[_summary_data.variable == 'BreakevenMValue','value'].iloc[0]
+            _summary_data_bv = int(_summary_data_bv)
+            _summary_data_mv = _summary_data.loc[_summary_data.variable == 'buyoutMValue','value'].iloc[0]
+            _summary_data_mv = int(_summary_data_mv)
+            _summary_data_fb = _summary_data.loc[_summary_data.variable == 'FiscalBalance_unit','value'].iloc[0]
+            _summary_data_fb = int(_summary_data_fb)
+            _summary_data_fb_color = 'red' if _summary_data_fb<0 else 'blue'
+            str_print = f'- **{_summary_data_type}**\n    - **Breakeven Value**: $ {_summary_data_bv:,}\n'
+            str_print = str_print + f'    - **Market Value**: $ {_summary_data_mv:,}\n'
+            str_print = str_print + f'    - **Fiscal Balance**: **:{_summary_data_fb_color}[$ {_summary_data_fb:,}]**\n'
+            _summary_text.append(str_print)
+            _summary_text = ''.join(_summary_text)
+        return _summary_text
+        
     with col_Dash_1:
         fig1_data = de_breakeven_out_[['HousingType','MunCost_unit','SchCost_unit']
         ].melt(id_vars = 'HousingType', value_vars = ['MunCost_unit','SchCost_unit'])
-        
+
+        _summary_text = []
+        for i in fig1_data.HousingType.drop_duplicates():
+            _summary_data = fig1_data.loc[fig1_data.HousingType == i]
+            _summary_data_type = _summary_data.HousingType.iloc[0]
+            _summary_data_mc = _summary_data.loc[_summary_data.variable == 'MunCost_unit','value'].iloc[0]
+            _summary_data_mc = int(_summary_data_mc)
+            _summary_data_sc = _summary_data.loc[_summary_data.variable == 'SchCost_unit','value'].iloc[0]
+            _summary_data_sc = int(_summary_data_sc)
+            str_print = f'- **{_summary_data_type}**\n    - **Municipal Cost**: $ {_summary_data_mc:,}\n    - **School Cost**: $ {_summary_data_sc:,}\n'
+            _summary_text.append(str_print)
+        _summary_text = ''.join(_summary_text)
+        st.markdown('##### **Municipal and School Cost per Unit**')
         fig1 = px.histogram(fig1_data, 
                             x="HousingType", y="value",
                             color='variable', barmode='group',
                             height=400)
         
         st.plotly_chart(fig1, use_container_width = True)
-        
+
+        st.markdown(_summary_text)
+    
     with col_Dash_2:
         fig2_data = de_breakeven_out_[['HousingType','BreakevenMValue','buyoutMValue','FiscalBalance_unit']
-        ].melt(id_vars = 'HousingType', value_vars = ['BreakevenMValue','buyoutMValue','FiscalBalance_unit'])
-        
+        ].melt(id_vars = 'HousingType', 
+               value_vars = ['BreakevenMValue','buyoutMValue','FiscalBalance_unit']
+              )
+
+        st.markdown('##### **Fiscal Surplus or Deficit per Unit**', unsafe_allow_html = True)
         fig2 = px.histogram(fig2_data, 
                             x="HousingType", y="value",
                             color='variable', barmode='group',
@@ -316,11 +365,44 @@ with tab3:
         
         st.plotly_chart(fig2, use_container_width = True)
 
+        df_Mun_NJ_Buyout_select = df_Mun_NJ_Buyout_mod.loc[
+        (df_Mun_NJ_Buyout_mod.County == select_County) & 
+        (df_Mun_NJ_Buyout_mod.Municipality == select_Mun)]
+
+        _buyout_Mvalue = 'N/A'
+        str_print = f'- **Average Market Value of Buyout Properties**: $ N/A\n'
+        
+        if len(df_Mun_NJ_Buyout_select)>0:
+            _buyout_Mvalue = df_Mun_NJ_Buyout_select.buyout_avg_value.iloc[0]
+            _buyout_Mvalue = int(_buyout_Mvalue)
+            
+            str_print = f'- **Average Market Value of Buyout Properties**: $ {_buyout_Mvalue:,}\n'
+
+        _summary_text = []
+        _summary_text.append(str_print)
+        
+        for i in fig1_data.HousingType.drop_duplicates():
+            _summary_data = fig2_data.loc[fig2_data.HousingType == i]
+            _summary_data_type = _summary_data.HousingType.iloc[0]
+            _summary_data_bv = _summary_data.loc[_summary_data.variable == 'BreakevenMValue','value'].iloc[0]
+            _summary_data_bv = int(_summary_data_bv)
+            _summary_data_mv = _summary_data.loc[_summary_data.variable == 'buyoutMValue','value'].iloc[0]
+            _summary_data_mv = int(_summary_data_mv)
+            _summary_data_fb = _summary_data.loc[_summary_data.variable == 'FiscalBalance_unit','value'].iloc[0]
+            _summary_data_fb = int(_summary_data_fb)
+            _summary_data_fb_color = 'red' if _summary_data_fb<0 else 'blue'
+            str_print = f'- **{_summary_data_type}**\n    - **Breakeven Value**: $ {_summary_data_bv:,}\n'
+            str_print = str_print + f'    - **Market Value**: $ {_summary_data_mv:,}\n'
+            str_print = str_print + f'    - **Fiscal Balance**: **:{_summary_data_fb_color}[$ {_summary_data_fb:,}]**\n'
+            _summary_text.append(str_print)
+        _summary_text = ''.join(_summary_text)
+        st.markdown(_summary_text)
+
 with tab9:
     st.markdown('''
     - This simulator includes New Jersey municipalities with their own K–12 school districts: `212`/`565` (`37.5%` coverage).
         - E.g., `Hoboken City` - `Hoboken Public School District`
-    - `11/14/2023` version
+    - `11/20/2023` version
     ''')
 
 # st.divider()
