@@ -395,7 +395,7 @@ with tab3:
         
         fig1 = px.bar(fig1_data, x="value", y="HousingType_label", orientation='h', color = 'var_label')
         fig1.update_layout(
-            title=None,
+            title='',
             xaxis_title="$",
             yaxis_title=None,
             legend_title='Cost per Unit')
