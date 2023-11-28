@@ -366,6 +366,22 @@ with tab3:
         fig1_data = de_breakeven_out_[['HousingType','MunCost_unit','SchCost_unit']
         ].melt(id_vars = 'HousingType', value_vars = ['MunCost_unit','SchCost_unit'])
 
+        fig1_data['HousingType_label'] = fig1_data.HousingType.str.replace(
+                'Single-Family','SF'
+            ).str.replace(
+                'Attached','A'
+            ).str.replace(
+                'Detached','D'
+            ).str.replace('SF ','SF')
+            
+            fig1_data['var_label'] = fig1_data.variable.str.replace(
+                'MunCost_','Municipal'
+            ).str.replace(
+                'SchCost_','School'
+            ).str.replace(
+                'unit',''
+            )
+
         _summary_text = []
         for i in fig1_data.HousingType.drop_duplicates():
             _summary_data = fig1_data.loc[fig1_data.HousingType == i]
@@ -378,10 +394,13 @@ with tab3:
             _summary_text.append(str_print)
         _summary_text = ''.join(_summary_text)
         st.markdown('##### **Municipal and School Cost per Unit**')
-        fig1 = px.histogram(fig1_data, 
-                            x="HousingType", y="value",
-                            color='variable', barmode='group',
-                            height=400)
+        
+        fig1 = px.bar(fig1_data, x="value", y="HousingType_label", orientation='h', color = 'var_label')
+        fig1.update_layout(
+            title=None,
+            xaxis_title="$",
+            yaxis_title=None,
+            legend_title='Cost per Unit')
         
         st.plotly_chart(fig1, use_container_width = True)
 
