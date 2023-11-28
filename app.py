@@ -374,13 +374,11 @@ with tab3:
                 'Detached','D'
             ).str.replace('SF ','SF')
             
-            fig1_data['var_label'] = fig1_data.variable.str.replace(
+        fig1_data['var_label'] = fig1_data.variable.str.replace(
                 'MunCost_','Municipal'
             ).str.replace(
                 'SchCost_','School'
-            ).str.replace(
-                'unit',''
-            )
+            ).str.replace('unit','')
 
         _summary_text = []
         for i in fig1_data.HousingType.drop_duplicates():
