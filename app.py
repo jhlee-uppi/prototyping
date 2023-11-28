@@ -212,7 +212,7 @@ with tab2:
     # Breakeven Analysis Table
     de_breakeven_in = pd.DataFrame(
         {
-            "HousingType": df_DM_NJ_t01.HousingType.drop_duplicates().iloc[[1,2,3,4]].tolist(),
+            "HousingType": df_DM_NJ_t01.HousingType.drop_duplicates().iloc[[0,1,2,3]].tolist(),
             "num_units": [1,1,1,1],
             "buyoutMValue":[0,0,0,0]
         }
