@@ -39,8 +39,8 @@ with col_0_2:
 def load_data():
     
     # datasets
-    df_DM_NJ_t01 = pd.read_csv('data/DM_NJ_2021ACS_tableIIB1.csv')
-    df_DM_NJ_t02 = pd.read_csv('data/DM_NJ_2021ACS_tableIIB2.csv')
+    df_DM_NJ_t01 = pd.read_csv('data/DM_NJ_2021ACS_tableIIB1_.csv')
+    df_DM_NJ_t02 = pd.read_csv('data/DM_NJ_2021ACS_tableIIB2_.csv')
     df_Mun_NJ_FIA = pd.read_csv('data/FIA_NJ_110723.csv')
     df_Mun_NJ_Buyout = pd.read_csv('data/111823_buyout_values.csv')
 
@@ -440,5 +440,3 @@ with tab9:
         - E.g., `Hoboken City` - `Hoboken Public School District`
     - `11/27/2023` version
     ''')
-
-# st.divider()
