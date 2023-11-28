@@ -1,4 +1,3 @@
-
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 from annotated_text import annotated_text
@@ -36,7 +35,7 @@ with col_0_2:
 # st.sidebar.markdown("# Fiscal Impact Simulator")
 # st.divider()
     
-@st.cache_data
+# @st.cache_data
 def load_data():
     
     # datasets
@@ -115,11 +114,27 @@ with tab1:
         geo_target['lat'] = geo_target.representative_point().y
         geo_target['MunLabel'] = geo_target['MunLabel'].str.replace('City City','City')
         
+        # m = folium.Map(location=[ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
+        #                min_zoom = 11,max_zoom=13,zoom_start=12, zoom_control = False,
+        #                tiles="CartoDB positron")
         sim_geo = gpd.GeoSeries(geo_target["geometry"]).simplify(tolerance=0.0001).to_crs(4326)
         geo_j = sim_geo.to_json()
         geo_j = folium.GeoJson(data=geo_j, 
                                style_function=lambda x: {"fillOpacity": .5, 'fillColor':'#CC0033', 
                                                          'color':'#CC0033'})
+        # folium.map.Marker(
+        #       [ geo_target['lat'].iloc[0], geo_target['lon'].iloc[0] ],
+        #       icon=DivIcon(
+        #           icon_size=(400,50),
+        #           icon_anchor=(200,25),
+        #           html=f'<div style="font-size:14px; color:black;' +
+        #                f'font-weight:bold;text-align:center;vertical-align: middle;">' +
+        #                f'{geo_target["MunLabel"].iloc[0]}</div>')).add_to(m)
+        
+        # geo_j.add_to(m)
+        # mun_map = st_folium(m, height = 400, use_container_width = True)
+
+        
 
         m2 = leafmap.Map(
             search_control = False,
@@ -152,6 +167,8 @@ with tab1:
         )
         
         m2.to_streamlit(height=400, )
+
+# select_list_housingType = []
 
 def _select_list():
     try:
@@ -209,6 +226,8 @@ with tab2:
 
     col_BE_1, col_BE_2 = st.columns([0.8, 0.2])
 
+    
+    
     with col_BE_1:
         
         st.markdown("### Input")
@@ -221,9 +240,16 @@ with tab2:
                     help="The category of housing units",
                     width='medium',
                     disabled = True
-                    # options=_select_list(),
+                    # options=_select_list(),#df_DM_NJ_t01[~df_DM_NJ_t01.HousingType.isin(select_list_housingType)].HousingType.drop_duplicates().tolist(),
                     # required=True,
                 ),
+                # "HousingType": st.column_config.SelectboxColumn(
+                #     "Housing Type",
+                #     help="The category of housing units",
+                #     width='medium',
+                #     options=_select_list(),#df_DM_NJ_t01[~df_DM_NJ_t01.HousingType.isin(select_list_housingType)].HousingType.drop_duplicates().tolist(),
+                #     required=True,
+                # )
                 "num_units": st.column_config.NumberColumn(
                     "# units",
                     help="The number of housing units",
@@ -273,7 +299,9 @@ with tab2:
         de_breakeven_out_['BreakevenMValue'] = de_breakeven_out_['TotCost_unit'] / (select_mun_be['SumRate_Mun_Sch'].iloc[0]/100)
         de_breakeven_out_['FiscalBalance_unit'] = - (de_breakeven_out_['BreakevenMValue'] - de_breakeven_out_['buyoutMValue'])
         de_breakeven_out_['FiscalBalance_total'] = de_breakeven_out_['FiscalBalance_unit'] * de_breakeven_out_['num_units']
-
+    
+        # de_breakeven_out_
+        
         st.data_editor(
             de_breakeven_out_[['FiscalBalance_total']
             ].style.format({"FiscalBalance_total": "$ {:,.0f}"}),
@@ -305,6 +333,14 @@ with tab3:
             "**Selected Municipality**", " ", (select_State, "state", "#d6d7da"), " ", (select_County, "county", "#d6d7da")," ",(select_Mun, "municipality", "#d6d7da")
         )
 
+    # st.markdown('''
+
+    # ### :red[Streamlit] :orange[can] :green[write] :blue[text] :violet[in]
+    # #### :gray[pretty] :rainbow[colors].
+    # ''')
+
+    # for i in range(5):
+    
     col_Dash_1, col_Dash_2 = st.columns(2)
 
     def _summary_text_return(list_HousingType, data):
@@ -402,7 +438,7 @@ with tab9:
     st.markdown('''
     - This simulator includes New Jersey municipalities with their own K–12 school districts: `212`/`565` (`37.5%` coverage).
         - E.g., `Hoboken City` - `Hoboken Public School District`
-    - `11/20/2023` version
+    - `11/27/2023` version
     ''')
 
 # st.divider()
